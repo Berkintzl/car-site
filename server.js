@@ -25,7 +25,7 @@ app.use(express.static('public'));
 
 // Session configuration
 app.use(session({
-    secret: 'car-site-secret-key-2024',
+    secret: 'car-site-secret-key-2025',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
