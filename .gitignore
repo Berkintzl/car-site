@@ -69,3 +69,4 @@ Thumbs.db
 
 # Uploaded images (optional - you might want to keep these)
 # public/images/uploads/
+.vercel/project.json
