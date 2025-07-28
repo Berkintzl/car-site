@@ -118,7 +118,3 @@ car-site/
 4. Commit your changes
 5. Push to the branch
 6. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
