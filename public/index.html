@@ -26,11 +26,20 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link">Contact</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="loginNavItem">
                         <a href="#" class="nav-link" id="loginBtn">Login</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="registerNavItem">
                         <a href="#" class="nav-link" id="registerBtn">Register</a>
+                    </li>
+                    <li class="nav-item" id="dashboardNavItem" style="display: none;">
+                        <a href="#" class="nav-link" id="dashboardBtn">Dashboard</a>
+                    </li>
+                    <li class="nav-item" id="favoritesNavItem" style="display: none;">
+                        <a href="#" class="nav-link" id="favoritesBtn">Favorites</a>
+                    </li>
+                    <li class="nav-item" id="logoutNavItem" style="display: none;">
+                        <a href="#" class="nav-link" id="logoutBtn">Logout</a>
                     </li>
                 </ul>
                 <div class="hamburger">
@@ -50,6 +59,7 @@
                 <div class="search-box">
                     <input type="text" placeholder="Search by make, model, or keyword..." id="searchInput">
                     <button class="search-btn" id="searchBtn">Search</button>
+                    <button class="filter-btn" id="filterBtn">Advanced Filters</button>
                 </div>
             </div>
         </section>
@@ -110,6 +120,260 @@
                     <input type="password" id="confirmPassword" required>
                 </div>
                 <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="filtersModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Advanced Search Filters</h2>
+            <form id="filtersForm">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="makeFilter">Make:</label>
+                        <select id="makeFilter">
+                            <option value="">Any Make</option>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Honda">Honda</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Ford">Ford</option>
+                            <option value="Tesla">Tesla</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bodyTypeFilter">Body Type:</label>
+                        <select id="bodyTypeFilter">
+                            <option value="">Any Type</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Coupe">Coupe</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="minPrice">Min Price:</label>
+                        <input type="number" id="minPrice" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxPrice">Max Price:</label>
+                        <input type="number" id="maxPrice" placeholder="100000">
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="minYear">Min Year:</label>
+                        <input type="number" id="minYear" placeholder="2000">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxYear">Max Year:</label>
+                        <input type="number" id="maxYear" placeholder="2025">
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="fuelTypeFilter">Fuel Type:</label>
+                        <select id="fuelTypeFilter">
+                            <option value="">Any Fuel Type</option>
+                            <option value="Gasoline">Gasoline</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="Diesel">Diesel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transmissionFilter">Transmission:</label>
+                        <select id="transmissionFilter">
+                            <option value="">Any Transmission</option>
+                            <option value="Automatic">Automatic</option>
+                            <option value="Manual">Manual</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="maxMileage">Max Mileage:</label>
+                        <input type="number" id="maxMileage" placeholder="100000">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="clearFilters">Clear Filters</button>
+                    <button type="submit">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboardModal" class="modal">
+        <div class="modal-content dashboard-content">
+            <span class="close">&times;</span>
+            <h2>User Dashboard</h2>
+            <div class="dashboard-tabs">
+                <button class="tab-btn active" data-tab="profile">Profile</button>
+                <button class="tab-btn" data-tab="listings">My Listings</button>
+                <button class="tab-btn" data-tab="favorites">Favorites</button>
+                <button class="tab-btn" data-tab="searches">Saved Searches</button>
+            </div>
+            
+            <div id="profileTab" class="tab-content active">
+                <h3>Profile Information</h3>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="profileName">Full Name:</label>
+                        <input type="text" id="profileName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Phone:</label>
+                        <input type="tel" id="profilePhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePicture">Profile Picture:</label>
+                        <input type="file" id="profilePicture" accept="image/*">
+                    </div>
+                    <button type="submit">Update Profile</button>
+                </form>
+                
+                <h3>Change Password</h3>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password:</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password:</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirm New Password:</label>
+                        <input type="password" id="confirmNewPassword" required>
+                    </div>
+                    <button type="submit">Change Password</button>
+                </form>
+            </div>
+            
+            <div id="listingsTab" class="tab-content">
+                <h3>My Car Listings</h3>
+                <button id="addCarBtn" class="add-car-btn">Add New Car</button>
+                <div id="userListings" class="user-listings">
+                </div>
+            </div>
+            
+            <div id="favoritesTab" class="tab-content">
+                <h3>Favorite Cars</h3>
+                <div id="userFavorites" class="user-favorites">
+                </div>
+            </div>
+            
+            <div id="searchesTab" class="tab-content">
+                <h3>Saved Searches</h3>
+                <div id="savedSearches" class="saved-searches">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="carModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="carModalTitle">Add New Car</h2>
+            <form id="carForm" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="carMake">Make:</label>
+                        <input type="text" id="carMake" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="carModel">Model:</label>
+                        <input type="text" id="carModel" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="carYear">Year:</label>
+                        <input type="number" id="carYear" min="1900" max="2025" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="carPrice">Price:</label>
+                        <input type="number" id="carPrice" min="0" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="carMileage">Mileage:</label>
+                        <input type="number" id="carMileage" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="carFuelType">Fuel Type:</label>
+                        <select id="carFuelType" required>
+                            <option value="">Select Fuel Type</option>
+                            <option value="Gasoline">Gasoline</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="Diesel">Diesel</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="carTransmission">Transmission:</label>
+                        <select id="carTransmission" required>
+                            <option value="">Select Transmission</option>
+                            <option value="Automatic">Automatic</option>
+                            <option value="Manual">Manual</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="carBodyType">Body Type:</label>
+                        <select id="carBodyType">
+                            <option value="">Select Body Type</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Coupe">Coupe</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="carColor">Color:</label>
+                        <input type="text" id="carColor">
+                    </div>
+                    <div class="form-group">
+                        <label for="carEngineSize">Engine Size:</label>
+                        <input type="text" id="carEngineSize" placeholder="e.g., 2.5L">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="carDoors">Doors:</label>
+                        <input type="number" id="carDoors" min="2" max="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="carSeats">Seats:</label>
+                        <input type="number" id="carSeats" min="2" max="8">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="carCondition">Condition Rating (1-5):</label>
+                    <input type="number" id="carCondition" min="1" max="5" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="carDescription">Description:</label>
+                    <textarea id="carDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="carImage">Car Image:</label>
+                    <input type="file" id="carImage" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="carFeatures">Features (comma-separated):</label>
+                    <textarea id="carFeatures" rows="3" placeholder="e.g., Air Conditioning, Bluetooth, GPS"></textarea>
+                </div>
+                <button type="submit" id="carSubmitBtn">Add Car</button>
             </form>
         </div>
     </div>
