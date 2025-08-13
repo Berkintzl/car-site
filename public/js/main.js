@@ -6,6 +6,8 @@ const registerModal = document.getElementById('registerModal');
 const filtersModal = document.getElementById('filtersModal');
 const dashboardModal = document.getElementById('dashboardModal');
 const carModal = document.getElementById('carModal');
+const carDetailsModal = document.getElementById('carDetailsModal');
+const comparisonModal = document.getElementById('comparisonModal');
 const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
 const dashboardBtn = document.getElementById('dashboardBtn');
@@ -26,11 +28,13 @@ const addCarBtn = document.getElementById('addCarBtn');
 
 // Global variables
 let currentUser = null;
-let currentFilters = {};
+let allCars = [];
 let currentPage = 1;
 let totalPages = 1;
-let allCars = [];
+let currentFilters = {};
 let userFavorites = [];
+let comparisonList = [];
+let maxComparisonItems = 4;
 
 // Mobile menu toggle
 hamburger.addEventListener('click', () => {
@@ -76,6 +80,245 @@ window.addEventListener('click', (e) => {
         e.target.style.display = 'none';
     }
 });
+
+// Close modals when clicking outside
+carDetailsModal?.addEventListener('click', (e) => {
+    if (e.target === carDetailsModal) {
+        carDetailsModal.style.display = 'none';
+    }
+});
+
+comparisonModal?.addEventListener('click', (e) => {
+    if (e.target === comparisonModal) {
+        comparisonModal.style.display = 'none';
+    }
+});
+
+// Comparison functionality
+function toggleComparison(carId) {
+    const index = comparisonList.indexOf(carId);
+    
+    if (index > -1) {
+        // Remove from comparison
+        comparisonList.splice(index, 1);
+    } else {
+        // Add to comparison (max 4 items)
+        if (comparisonList.length >= maxComparisonItems) {
+            alert(`You can compare maximum ${maxComparisonItems} cars at once.`);
+            return;
+        }
+        comparisonList.push(carId);
+    }
+    
+    updateComparisonUI();
+    displayCars(allCars); // Refresh to update button states
+}
+
+function updateComparisonUI() {
+    const comparisonCount = comparisonList.length;
+    const startComparisonBtn = document.getElementById('startComparison');
+    const selectedCarsDiv = document.getElementById('selectedCarsForComparison');
+    
+    if (comparisonCount > 0) {
+        // Show comparison indicator
+        let comparisonIndicator = document.getElementById('comparisonIndicator');
+        if (!comparisonIndicator) {
+            comparisonIndicator = document.createElement('div');
+            comparisonIndicator.id = 'comparisonIndicator';
+            comparisonIndicator.className = 'comparison-indicator';
+            document.body.appendChild(comparisonIndicator);
+        }
+        
+        comparisonIndicator.innerHTML = `
+            <div class="comparison-badge">
+                <span>${comparisonCount} cars selected</span>
+                <button onclick="openComparisonModal()" class="btn btn-primary btn-sm">Compare</button>
+                <button onclick="clearComparison()" class="btn btn-outline btn-sm">Clear</button>
+            </div>
+        `;
+        comparisonIndicator.style.display = 'block';
+    } else {
+        const comparisonIndicator = document.getElementById('comparisonIndicator');
+        if (comparisonIndicator) {
+            comparisonIndicator.style.display = 'none';
+        }
+    }
+    
+    // Update modal content
+    if (selectedCarsDiv) {
+        if (comparisonCount > 0) {
+            const selectedCarsHtml = comparisonList.map(carId => {
+                const car = allCars.find(c => c.id === carId);
+                return car ? `
+                    <div class="selected-car-item">
+                        <span>${car.year} ${car.make} ${car.model}</span>
+                        <button onclick="toggleComparison(${carId})" class="btn btn-sm btn-outline">Remove</button>
+                    </div>
+                ` : '';
+            }).join('');
+            
+            selectedCarsDiv.innerHTML = selectedCarsHtml;
+        } else {
+            selectedCarsDiv.innerHTML = '<p>No cars selected for comparison.</p>';
+        }
+    }
+    
+    if (startComparisonBtn) {
+        startComparisonBtn.style.display = comparisonCount >= 2 ? 'block' : 'none';
+    }
+}
+
+function openComparisonModal() {
+    comparisonModal.style.display = 'block';
+    updateComparisonUI();
+}
+
+function clearComparison() {
+    comparisonList = [];
+    updateComparisonUI();
+    displayCars(allCars); // Refresh to update button states
+    
+    // Hide comparison results
+    const comparisonResults = document.getElementById('comparisonResults');
+    const comparisonSelector = document.querySelector('.comparison-selector');
+    if (comparisonResults && comparisonSelector) {
+        comparisonResults.style.display = 'none';
+        comparisonSelector.style.display = 'block';
+    }
+}
+
+async function startComparison() {
+    if (comparisonList.length < 2) {
+        alert('Please select at least 2 cars to compare.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/cars/compare', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ carIds: comparisonList })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            displayComparisonResults(data);
+        } else {
+            alert(data.message || 'Failed to compare cars');
+        }
+    } catch (error) {
+        console.error('Error comparing cars:', error);
+        alert('Failed to compare cars');
+    }
+}
+
+function displayComparisonResults(comparisonData) {
+    const comparisonResults = document.getElementById('comparisonResults');
+    const comparisonSelector = document.querySelector('.comparison-selector');
+    
+    if (!comparisonResults || !comparisonSelector) return;
+    
+    const { cars, summary } = comparisonData;
+    
+    let html = `
+        <div class="comparison-table-container">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Specification</th>
+                        ${cars.map(car => `<th>${car.year} ${car.make} ${car.model}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Price</strong></td>
+                        ${cars.map(car => `<td class="${car.price === summary.lowestPrice ? 'best-value' : car.price === summary.highestPrice ? 'highest-value' : ''}">
+                            $${car.price.toLocaleString()}
+                        </td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Mileage</strong></td>
+                        ${cars.map(car => `<td class="${car.mileage === summary.lowestMileage ? 'best-value' : car.mileage === summary.highestMileage ? 'highest-value' : ''}">
+                            ${car.mileage.toLocaleString()} miles
+                        </td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Year</strong></td>
+                        ${cars.map(car => `<td class="${car.year === summary.newestYear ? 'best-value' : car.year === summary.oldestYear ? 'highest-value' : ''}">
+                            ${car.year}
+                        </td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Fuel Type</strong></td>
+                        ${cars.map(car => `<td>${car.fuel_type}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Transmission</strong></td>
+                        ${cars.map(car => `<td>${car.transmission}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Body Type</strong></td>
+                        ${cars.map(car => `<td>${car.body_type}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Color</strong></td>
+                        ${cars.map(car => `<td>${car.color}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Doors</strong></td>
+                        ${cars.map(car => `<td>${car.doors}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Seats</strong></td>
+                        ${cars.map(car => `<td>${car.seats}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Condition</strong></td>
+                        ${cars.map(car => `<td>${car.condition_rating}/5</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Price per Mile</strong></td>
+                        ${cars.map(car => `<td>$${car.pricePerMile}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td><strong>Age</strong></td>
+                        ${cars.map(car => `<td>${car.ageInYears} years</td>`).join('')}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="comparison-summary">
+            <h3>Comparison Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="label">Price Range:</span>
+                    <span class="value">$${summary.lowestPrice.toLocaleString()} - $${summary.highestPrice.toLocaleString()}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Mileage Range:</span>
+                    <span class="value">${summary.lowestMileage.toLocaleString()} - ${summary.highestMileage.toLocaleString()} miles</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Year Range:</span>
+                    <span class="value">${summary.oldestYear} - ${summary.newestYear}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-actions">
+            <button onclick="clearComparison()" class="btn btn-outline">Start New Comparison</button>
+            <button onclick="comparisonModal.style.display = 'none'" class="btn btn-secondary">Close</button>
+        </div>
+    `;
+    
+    comparisonResults.innerHTML = html;
+    comparisonResults.style.display = 'block';
+    comparisonSelector.style.display = 'none';
+}
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -358,6 +601,9 @@ function displayCars(cars) {
                     <div class="car-actions">
                         <button onclick="viewCarDetails(${car.id})">View Details</button>
                         ${currentUser ? `<button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${car.id})">${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}</button>` : ''}
+                        <button onclick="toggleComparison(${car.id})" class="btn ${comparisonList.includes(car.id) ? 'btn-warning' : 'btn-outline'}">
+                            ${comparisonList.includes(car.id) ? 'Remove from Compare' : 'Compare'}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -365,8 +611,288 @@ function displayCars(cars) {
     }).join('');
 }
 
-function viewCarDetails(carId) {
-    alert(`Viewing details for car ID: ${carId}`);
+async function viewCarDetails(carId) {
+    try {
+        // Fetch car details
+        const carResponse = await fetch(`/api/cars/${carId}`);
+        const car = await carResponse.json();
+        
+        if (!carResponse.ok) {
+            throw new Error(car.message || 'Failed to load car details');
+        }
+        
+        // Fetch seller reputation
+        const reputationResponse = await fetch(`/api/user/${car.user_id}/reputation`);
+        const reputation = await reputationResponse.json();
+        
+        // Fetch reviews for this seller
+        const reviewsResponse = await fetch(`/api/reviews/user/${car.user_id}`);
+        const reviews = await reviewsResponse.json();
+        
+        // Display car details modal
+        displayCarDetailsModal(car, reputation, reviews);
+        
+    } catch (error) {
+        console.error('Error loading car details:', error);
+        alert('Failed to load car details');
+    }
+}
+
+function displayCarDetailsModal(car, reputation, reviews) {
+    const modal = document.getElementById('carDetailsModal');
+    const content = document.getElementById('carDetailsContent');
+    
+    const features = car.features ? JSON.parse(car.features) : [];
+    const images = car.images ? JSON.parse(car.images) : [];
+    
+    content.innerHTML = `
+        <div class="car-details-header">
+            <div class="car-images">
+                ${images.length > 0 ? 
+                    `<img src="/uploads/${images[0]}" alt="${car.make} ${car.model}" class="main-car-image">` :
+                    `<div class="no-image">No Image Available</div>`
+                }
+            </div>
+            <div class="car-info">
+                <h2>${car.year} ${car.make} ${car.model}</h2>
+                <p class="car-price">$${car.price.toLocaleString()}</p>
+                <div class="car-specs">
+                    <span><strong>Mileage:</strong> ${car.mileage.toLocaleString()} miles</span>
+                    <span><strong>Fuel Type:</strong> ${car.fuel_type}</span>
+                    <span><strong>Transmission:</strong> ${car.transmission}</span>
+                    <span><strong>Body Type:</strong> ${car.body_type}</span>
+                    <span><strong>Color:</strong> ${car.color}</span>
+                    <span><strong>Doors:</strong> ${car.doors}</span>
+                    <span><strong>Seats:</strong> ${car.seats}</span>
+                    <span><strong>Condition:</strong> ${car.condition_rating}/5</span>
+                </div>
+                ${features.length > 0 ? `
+                    <div class="car-features">
+                        <h4>Features:</h4>
+                        <div class="features-list">
+                            ${features.map(feature => `<span class="feature-tag">${feature.trim()}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+        
+        <div class="car-description">
+            <h3>Description</h3>
+            <p>${car.description}</p>
+        </div>
+        
+        <div class="seller-info">
+            <h3>Seller Information</h3>
+            <div class="seller-details">
+                <div class="seller-basic">
+                    <h4>${car.seller_name}</h4>
+                    <p>Phone: ${car.seller_phone || 'Not provided'}</p>
+                </div>
+                <div class="seller-reputation">
+                    <h4>Seller Reputation</h4>
+                    <div class="reputation-score">
+                        <span class="score">${reputation.reputation_score}/100</span>
+                        <div class="stars">
+                            ${generateStars(reputation.average_rating || 0)}
+                        </div>
+                        <span class="rating-text">${reputation.average_rating ? reputation.average_rating.toFixed(1) : '0.0'} (${reputation.total_reviews} reviews)</span>
+                    </div>
+                    ${reputation.total_reviews > 0 ? `
+                        <div class="rating-breakdown">
+                            <div class="rating-bar">
+                                <span>5★</span>
+                                <div class="bar"><div class="fill" style="width: ${(reputation.five_star / reputation.total_reviews) * 100}%"></div></div>
+                                <span>${reputation.five_star}</span>
+                            </div>
+                            <div class="rating-bar">
+                                <span>4★</span>
+                                <div class="bar"><div class="fill" style="width: ${(reputation.four_star / reputation.total_reviews) * 100}%"></div></div>
+                                <span>${reputation.four_star}</span>
+                            </div>
+                            <div class="rating-bar">
+                                <span>3★</span>
+                                <div class="bar"><div class="fill" style="width: ${(reputation.three_star / reputation.total_reviews) * 100}%"></div></div>
+                                <span>${reputation.three_star}</span>
+                            </div>
+                            <div class="rating-bar">
+                                <span>2★</span>
+                                <div class="bar"><div class="fill" style="width: ${(reputation.two_star / reputation.total_reviews) * 100}%"></div></div>
+                                <span>${reputation.two_star}</span>
+                            </div>
+                            <div class="rating-bar">
+                                <span>1★</span>
+                                <div class="bar"><div class="fill" style="width: ${(reputation.one_star / reputation.total_reviews) * 100}%"></div></div>
+                                <span>${reputation.one_star}</span>
+                            </div>
+                        </div>
+                    ` : '<p>No reviews yet</p>'}
+                </div>
+            </div>
+        </div>
+        
+        ${reviews.length > 0 ? `
+            <div class="seller-reviews">
+                <h3>Recent Reviews</h3>
+                <div class="reviews-list">
+                    ${reviews.slice(0, 3).map(review => `
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="reviewer-name">${review.reviewer_name}</span>
+                                <div class="review-rating">${generateStars(review.rating)}</div>
+                                <span class="review-date">${new Date(review.created_at).toLocaleDateString()}</span>
+                            </div>
+                            ${review.comment ? `<p class="review-comment">${review.comment}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+        
+        <div class="car-actions">
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="toggleFavorite(${car.id})">
+                    ${userFavorites.includes(car.id) ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'}
+                </button>
+                ${currentUser && currentUser.id !== car.user_id ? `
+                    <button class="btn-secondary" onclick="showReviewModal(${car.user_id}, ${car.id})">
+                        ⭐ Leave Review
+                    </button>
+                ` : ''}
+                <button class="btn-secondary" onclick="contactSeller('${car.seller_phone || ''}', '${car.make} ${car.model}')">
+                    📞 Contact Seller
+                </button>
+            </div>
+            
+            <div class="social-sharing">
+                <h4>Share this car:</h4>
+                <div class="share-buttons">
+                    <button class="share-btn facebook" onclick="shareOnSocial(${car.id}, 'facebook')">
+                        📘 Facebook
+                    </button>
+                    <button class="share-btn twitter" onclick="shareOnSocial(${car.id}, 'twitter')">
+                        🐦 Twitter
+                    </button>
+                    <button class="share-btn whatsapp" onclick="shareOnSocial(${car.id}, 'whatsapp')">
+                        💬 WhatsApp
+                    </button>
+                    <button class="share-btn linkedin" onclick="shareOnSocial(${car.id}, 'linkedin')">
+                        💼 LinkedIn
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return '⭐'.repeat(fullStars) + (hasHalfStar ? '⭐' : '') + '☆'.repeat(emptyStars);
+}
+
+async function shareOnSocial(carId, platform) {
+    try {
+        const response = await fetch(`/api/share/car/${carId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ platform })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            window.open(data.shareUrl, '_blank', 'width=600,height=400');
+        } else {
+            alert('Failed to generate share link');
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+        alert('Failed to share');
+    }
+}
+
+function contactSeller(phone, carInfo) {
+    if (phone) {
+        const message = `Hi, I'm interested in your ${carInfo}. Is it still available?`;
+        window.open(`tel:${phone}`);
+    } else {
+        alert('Seller contact information not available');
+    }
+}
+
+function showReviewModal(userId, carId) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            <h2>Leave a Review</h2>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="reviewRating">Rating:</label>
+                    <select id="reviewRating" required>
+                        <option value="">Select Rating</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                        <option value="4">⭐⭐⭐⭐☆ Good</option>
+                        <option value="3">⭐⭐⭐☆☆ Average</option>
+                        <option value="2">⭐⭐☆☆☆ Poor</option>
+                        <option value="1">⭐☆☆☆☆ Terrible</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reviewComment">Comment (optional):</label>
+                    <textarea id="reviewComment" rows="4" placeholder="Share your experience..."></textarea>
+                </div>
+                <button type="submit">Submit Review</button>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#reviewForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const rating = document.getElementById('reviewRating').value;
+        const comment = document.getElementById('reviewComment').value;
+        
+        try {
+            const response = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reviewed_user_id: userId,
+                    car_id: carId,
+                    rating: parseInt(rating),
+                    comment: comment
+                })
+            });
+            
+            if (response.ok) {
+                alert('Review submitted successfully!');
+                modal.remove();
+                // Refresh car details to show updated reputation
+                viewCarDetails(carId);
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Failed to submit review');
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('Failed to submit review');
+        }
+    });
 }
 
 async function toggleFavorite(carId) {
@@ -573,6 +1099,10 @@ async function checkLoginStatus() {
         updateNavigation(false);
     }
 }
+
+// Add event listeners for comparison modal
+document.getElementById('clearComparison')?.addEventListener('click', clearComparison);
+document.getElementById('startComparison')?.addEventListener('click', startComparison);
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {

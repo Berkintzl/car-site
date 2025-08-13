@@ -70,3 +70,6 @@ Thumbs.db
 # Uploaded images (optional - you might want to keep these)
 # public/images/uploads/
 .vercel/project.json
+staj-defteri
+tests/test-server.js
+tests/security.test.js

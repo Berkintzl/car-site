@@ -729,6 +729,233 @@ app.get('/api/reviews/user/:userId', (req, res) => {
     });
 });
 
+// Get user reputation/rating
+app.get('/api/user/:userId/reputation', (req, res) => {
+    const userId = req.params.userId;
+    
+    db.get(`SELECT 
+                COUNT(*) as total_reviews,
+                AVG(rating) as average_rating,
+                SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) as five_star,
+                SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) as four_star,
+                SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) as three_star,
+                SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) as two_star,
+                SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) as one_star
+            FROM reviews 
+            WHERE reviewed_user_id = ?`, 
+        [userId], (err, reputation) => {
+        if (err) {
+            console.error('Reputation error:', err);
+            return res.status(500).json({ message: 'Failed to get reputation' });
+        }
+        
+        // Calculate reputation score (0-100)
+        let reputationScore = 0;
+        if (reputation.total_reviews > 0) {
+            reputationScore = Math.round((reputation.average_rating / 5) * 100);
+        }
+        
+        res.json({
+            ...reputation,
+            average_rating: reputation.average_rating ? parseFloat(reputation.average_rating.toFixed(2)) : 0,
+            reputation_score: reputationScore
+        });
+    });
+});
+
+// Social sharing endpoint
+app.post('/api/share/car/:carId', (req, res) => {
+    const carId = req.params.carId;
+    const { platform } = req.body;
+    
+    // Get car details for sharing
+    db.get(`SELECT c.*, u.name as seller_name 
+            FROM cars c 
+            JOIN users u ON c.user_id = u.id 
+            WHERE c.id = ?`, 
+        [carId], (err, car) => {
+        if (err || !car) {
+            return res.status(404).json({ message: 'Car not found' });
+        }
+        
+        const baseUrl = req.protocol + '://' + req.get('host');
+        const carUrl = `${baseUrl}/car/${carId}`;
+        const shareText = `Check out this ${car.year} ${car.make} ${car.model} for $${car.price.toLocaleString()}`;
+        
+        let shareUrl = '';
+        
+        switch(platform) {
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(carUrl)}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(carUrl)}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + carUrl)}`;
+                break;
+            case 'linkedin':
+                shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(carUrl)}`;
+                break;
+            default:
+                return res.status(400).json({ message: 'Unsupported platform' });
+        }
+        
+        res.json({ shareUrl, shareText, carUrl });
+    });
+});
+
+// Car comparison endpoint
+app.post('/api/cars/compare', (req, res) => {
+    const { carIds } = req.body;
+    
+    if (!carIds || !Array.isArray(carIds) || carIds.length < 2 || carIds.length > 4) {
+        return res.status(400).json({ message: 'Please provide 2-4 car IDs for comparison' });
+    }
+    
+    const placeholders = carIds.map(() => '?').join(',');
+    const sql = `SELECT * FROM cars WHERE id IN (${placeholders})`;
+    
+    db.all(sql, carIds, (err, cars) => {
+        if (err) {
+            return res.status(500).json({ message: 'Database error' });
+        }
+        
+        if (cars.length !== carIds.length) {
+            return res.status(404).json({ message: 'One or more cars not found' });
+        }
+        
+        // Add comparison metrics
+        const comparison = {
+            cars: cars.map(car => ({
+                ...car,
+                features: car.features ? JSON.parse(car.features) : [],
+                pricePerMile: car.mileage > 0 ? (car.price / car.mileage).toFixed(2) : 'N/A',
+                ageInYears: new Date().getFullYear() - car.year
+            })),
+            summary: {
+                lowestPrice: Math.min(...cars.map(c => c.price)),
+                highestPrice: Math.max(...cars.map(c => c.price)),
+                lowestMileage: Math.min(...cars.map(c => c.mileage)),
+                highestMileage: Math.max(...cars.map(c => c.mileage)),
+                newestYear: Math.max(...cars.map(c => c.year)),
+                oldestYear: Math.min(...cars.map(c => c.year))
+            }
+        };
+        
+        res.json(comparison);
+    });
+});
+
+// SEO sitemap endpoint
+app.get('/sitemap.xml', (req, res) => {
+    res.set('Content-Type', 'text/xml');
+    
+    db.all('SELECT id, make, model, year, updated_at FROM cars WHERE status = "active" ORDER BY updated_at DESC', (err, cars) => {
+        if (err) {
+            return res.status(500).send('Error generating sitemap');
+        }
+        
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const currentDate = new Date().toISOString().split('T')[0];
+        
+        let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
+        
+        // Add main pages
+        sitemap += `  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+`;
+        
+        // Add car listings
+        cars.forEach(car => {
+            const lastmod = car.updated_at ? new Date(car.updated_at).toISOString().split('T')[0] : currentDate;
+            sitemap += `  <url>
+    <loc>${baseUrl}/car/${car.id}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+        });
+        
+        // Add make/model pages
+        const makes = [...new Set(cars.map(car => car.make))];
+        makes.forEach(make => {
+            sitemap += `  <url>
+    <loc>${baseUrl}/cars/${make.toLowerCase()}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+        });
+        
+        sitemap += `</urlset>`;
+        res.send(sitemap);
+    });
+});
+
+// Database backup endpoint (admin only)
+app.post('/api/admin/backup', requireAuth, (req, res) => {
+    // Simple backup by copying database
+    const fs = require('fs');
+    const path = require('path');
+    
+    const backupDir = path.join(__dirname, 'backups');
+    if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir);
+    }
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(backupDir, `backup-${timestamp}.db`);
+    
+    try {
+        fs.copyFileSync('./database.db', backupPath);
+        res.json({ 
+            message: 'Backup created successfully', 
+            backupFile: `backup-${timestamp}.db`,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Backup error:', error);
+        res.status(500).json({ message: 'Backup failed' });
+    }
+});
+
+// System health check endpoint
+app.get('/api/health', (req, res) => {
+    const startTime = Date.now();
+    
+    // Check database connection
+    db.get('SELECT 1', (err) => {
+        const responseTime = Date.now() - startTime;
+        
+        if (err) {
+            return res.status(500).json({
+                status: 'unhealthy',
+                database: 'disconnected',
+                responseTime: responseTime,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        res.json({
+            status: 'healthy',
+            database: 'connected',
+            responseTime: responseTime,
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
+            timestamp: new Date().toISOString()
+        });
+    });
+});
+
 // User profile endpoints
 app.put('/api/user/profile', requireAuth, upload.single('profile_picture'), (req, res) => {
     const userId = req.session.userId;

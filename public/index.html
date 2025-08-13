@@ -378,6 +378,67 @@
         </div>
     </div>
 
+    <!-- Car Details Modal -->
+    <div id="carDetailsModal" class="modal">
+        <div class="modal-content car-details-content">
+            <span class="close">&times;</span>
+            <div id="carDetailsContent">
+                <!-- Car details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Car Comparison Modal -->
+    <div id="comparisonModal" class="modal">
+        <div class="modal-content comparison-content">
+            <span class="close">&times;</span>
+            <div class="comparison-header">
+                <h2>Car Comparison</h2>
+                <div class="comparison-controls">
+                    <button id="addToComparison" class="btn btn-secondary">Add Cars to Compare</button>
+                    <button id="clearComparison" class="btn btn-outline">Clear All</button>
+                </div>
+            </div>
+            <div id="comparisonContent">
+                <div class="comparison-selector">
+                    <p>Select 2-4 cars to compare by clicking the "Compare" button on car listings.</p>
+                    <div id="selectedCarsForComparison" class="selected-cars"></div>
+                    <button id="startComparison" class="btn btn-primary" style="display: none;">Compare Selected Cars</button>
+                </div>
+                <div id="comparisonResults" style="display: none;">
+                    <!-- Comparison results will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Find your perfect car at CarHub - the best car marketplace with thousands of listings, advanced search filters, and trusted sellers.">
+    <meta name="keywords" content="cars for sale, used cars, car marketplace, buy cars, sell cars, automotive">
+    <meta property="og:title" content="CarHub - Your Premier Car Marketplace">
+    <meta property="og:description" content="Discover thousands of quality cars from trusted sellers. Advanced search, detailed listings, and secure transactions.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://carhub.com">
+    <meta property="og:image" content="/images/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CarHub - Your Premier Car Marketplace">
+    <meta name="twitter:description" content="Find your perfect car with our advanced search and trusted sellers.">
+    <link rel="canonical" href="https://carhub.com">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "CarHub",
+        "url": "https://carhub.com",
+        "description": "Premier car marketplace for buying and selling quality vehicles",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://carhub.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
     <script src="js/main.js"></script>
 </body>
 </html>
