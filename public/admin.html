@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarHub Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+    <div class="admin-container">
+        <nav class="admin-sidebar">
+            <div class="admin-logo">
+                <h2>CarHub Admin</h2>
+            </div>
+            <ul class="admin-nav">
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#users" class="nav-link" data-section="users">Users</a></li>
+                <li><a href="#cars" class="nav-link" data-section="cars">Car Listings</a></li>
+                <li><a href="#reviews" class="nav-link" data-section="reviews">Reviews</a></li>
+                <li><a href="#analytics" class="nav-link" data-section="analytics">Analytics</a></li>
+                <li><a href="#settings" class="nav-link" data-section="settings">Settings</a></li>
+                <li><a href="/" class="nav-link">Back to Site</a></li>
+                <li><a href="#" id="adminLogout" class="nav-link">Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1 id="sectionTitle">Dashboard</h1>
+                <div class="admin-user-info">
+                    <span id="adminUserName">Admin User</span>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="admin-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Users</h3>
+                            <p class="stat-number" id="totalUsers">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Active Listings</h3>
+                            <p class="stat-number" id="activeListings">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pending Reviews</h3>
+                            <p class="stat-number" id="pendingReviews">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Monthly Revenue</h3>
+                            <p class="stat-number" id="monthlyRevenue">$0</p>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <h3>User Registration Trend</h3>
+                            <canvas id="userChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Listing Activity</h3>
+                            <canvas id="listingChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="recent-activity">
+                        <h3>Recent Activity</h3>
+                        <div id="recentActivity" class="activity-list">
+                            <!-- Activity items will be loaded here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users" class="admin-section">
+                    <div class="section-header">
+                        <h2>User Management</h2>
+                        <div class="search-bar">
+                            <input type="text" id="userSearch" placeholder="Search users...">
+                            <button id="searchUsersBtn">Search</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="usersTable" class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Registration Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- User data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="usersPagination">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Cars Section -->
+                <section id="cars" class="admin-section">
+                    <div class="section-header">
+                        <h2>Car Listings Management</h2>
+                        <div class="filter-controls">
+                            <select id="carStatusFilter">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="sold">Sold</option>
+                            </select>
+                            <input type="text" id="carSearch" placeholder="Search cars...">
+                            <button id="searchCarsBtn">Search</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="carsTable" class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Make/Model</th>
+                                    <th>Year</th>
+                                    <th>Price</th>
+                                    <th>Owner</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="carsTableBody">
+                                <!-- Car data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="carsPagination">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Reviews Section -->
+                <section id="reviews" class="admin-section">
+                    <div class="section-header">
+                        <h2>Reviews Management</h2>
+                        <div class="filter-controls">
+                            <select id="reviewStatusFilter">
+                                <option value="all">All Reviews</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <select id="reviewRatingFilter">
+                                <option value="all">All Ratings</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="reviews-container" id="reviewsContainer">
+                        <!-- Reviews will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section id="analytics" class="admin-section">
+                    <div class="section-header">
+                        <h2>Analytics & Reports</h2>
+                        <div class="date-range">
+                            <input type="date" id="startDate">
+                            <input type="date" id="endDate">
+                            <button id="generateReport">Generate Report</button>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>Traffic Overview</h3>
+                            <canvas id="trafficChart" width="400" height="300"></canvas>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Popular Car Makes</h3>
+                            <canvas id="makesChart" width="400" height="300"></canvas>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Revenue Trends</h3>
+                            <canvas id="revenueChart" width="400" height="300"></canvas>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>User Engagement</h3>
+                            <canvas id="engagementChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="export-section">
+                        <h3>Export Reports</h3>
+                        <button id="exportCSV" class="export-btn">Export as CSV</button>
+                        <button id="exportPDF" class="export-btn">Export as PDF</button>
+                        <button id="exportExcel" class="export-btn">Export as Excel</button>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="admin-section">
+                    <div class="section-header">
+                        <h2>System Settings</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>General Settings</h3>
+                            <form id="generalSettingsForm">
+                                <div class="form-group">
+                                    <label for="siteName">Site Name:</label>
+                                    <input type="text" id="siteName" value="CarHub">
+                                </div>
+                                <div class="form-group">
+                                    <label for="siteDescription">Site Description:</label>
+                                    <textarea id="siteDescription">Find your perfect car with our advanced search and trusted sellers</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactEmail">Contact Email:</label>
+                                    <input type="email" id="contactEmail" value="admin@carhub.com">
+                                </div>
+                                <button type="submit">Save General Settings</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Listing Settings</h3>
+                            <form id="listingSettingsForm">
+                                <div class="form-group">
+                                    <label for="maxImages">Max Images per Listing:</label>
+                                    <input type="number" id="maxImages" value="10" min="1" max="20">
+                                </div>
+                                <div class="form-group">
+                                    <label for="autoApprove">Auto-approve Listings:</label>
+                                    <input type="checkbox" id="autoApprove">
+                                </div>
+                                <div class="form-group">
+                                    <label for="listingDuration">Default Listing Duration (days):</label>
+                                    <input type="number" id="listingDuration" value="30" min="1" max="365">
+                                </div>
+                                <button type="submit">Save Listing Settings</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Email Settings</h3>
+                            <form id="emailSettingsForm">
+                                <div class="form-group">
+                                    <label for="smtpHost">SMTP Host:</label>
+                                    <input type="text" id="smtpHost" placeholder="smtp.gmail.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtpPort">SMTP Port:</label>
+                                    <input type="number" id="smtpPort" value="587">
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtpUser">SMTP Username:</label>
+                                    <input type="text" id="smtpUser">
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtpPass">SMTP Password:</label>
+                                    <input type="password" id="smtpPass">
+                                </div>
+                                <button type="submit">Save Email Settings</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Security Settings</h3>
+                            <form id="securitySettingsForm">
+                                <div class="form-group">
+                                    <label for="sessionTimeout">Session Timeout (minutes):</label>
+                                    <input type="number" id="sessionTimeout" value="30" min="5" max="1440">
+                                </div>
+                                <div class="form-group">
+                                    <label for="maxLoginAttempts">Max Login Attempts:</label>
+                                    <input type="number" id="maxLoginAttempts" value="5" min="3" max="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="requireEmailVerification">Require Email Verification:</label>
+                                    <input type="checkbox" id="requireEmailVerification">
+                                </div>
+                                <button type="submit">Save Security Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="userModalTitle">User Details</h2>
+            <div id="userModalContent">
+                <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="carModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="carModalTitle">Car Details</h2>
+            <div id="carModalContent">
+                <!-- Car details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="reviewModalTitle">Review Details</h2>
+            <div id="reviewModalContent">
+                <!-- Review details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

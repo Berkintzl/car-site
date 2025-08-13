@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Giriş - CarHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .login-form {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+        }
+
+        .remember-me label {
+            margin-bottom: 0;
+            font-weight: normal;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .back-to-site {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-to-site a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-site a:hover {
+            color: #764ba2;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert.error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert.success {
+            background: #efe;
+            color: #363;
+            border: 1px solid #cfc;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 10px;
+            }
+
+            .login-header {
+                padding: 25px 20px;
+            }
+
+            .login-form {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Admin Paneli</h1>
+            <p>CarHub Yönetim Sistemi</p>
+        </div>
+        
+        <form class="login-form" id="adminLoginForm">
+            <div id="alertContainer"></div>
+            
+            <div class="form-group">
+                <label for="email">E-posta Adresi</label>
+                <input type="email" id="email" name="email" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <label for="rememberMe">Beni hatırla</label>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                Giriş Yap
+            </button>
+            
+            <div class="loading" id="loading"></div>
+        </form>
+        
+        <div class="back-to-site">
+            <a href="/">← Ana Siteye Dön</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('adminLoginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+            const alertContainer = document.getElementById('alertContainer');
+            
+            // Check if already logged in
+            checkAuthStatus();
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const rememberMe = document.getElementById('rememberMe').checked;
+                
+                if (!email || !password) {
+                    showAlert('Lütfen tüm alanları doldurun.', 'error');
+                    return;
+                }
+                
+                setLoading(true);
+                
+                try {
+                    const response = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email,
+                            password,
+                            rememberMe
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        showAlert('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/admin.html';
+                        }, 1000);
+                    } else {
+                        showAlert(data.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showAlert('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            });
+            
+            async function checkAuthStatus() {
+                try {
+                    const response = await fetch('/api/admin/auth');
+                    const data = await response.json();
+                    
+                    if (response.ok && data.isAdmin) {
+                        window.location.href = '/admin.html';
+                    }
+                } catch (error) {
+                    // User not authenticated, stay on login page
+                }
+            }
+            
+            function setLoading(isLoading) {
+                loginBtn.disabled = isLoading;
+                loading.style.display = isLoading ? 'block' : 'none';
+                loginBtn.textContent = isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap';
+            }
+            
+            function showAlert(message, type) {
+                alertContainer.innerHTML = `<div class="alert ${type}">${message}</div>`;
+                
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+            }
+            
+            // Auto-focus email field
+            document.getElementById('email').focus();
+            
+            // Enter key handling
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !loginBtn.disabled) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>
