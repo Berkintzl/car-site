@@ -366,7 +366,7 @@ loginForm?.addEventListener('submit', async (e) => {
     const formData = new FormData(loginForm);
     
     try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -380,14 +380,14 @@ loginForm?.addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Login successful!');
+            alert('Login successful! Welcome back to CarHub.');
             loginModal.style.display = 'none';
             loginForm.reset();
             currentUser = data.user;
             updateNavigation(true);
             loadUserFavorites();
         } else {
-            alert(data.error || 'Login failed');
+            alert(data.message || 'Login failed');
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -399,8 +399,17 @@ registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(registerForm);
     
+    // Check if passwords match
+    const password = formData.get('password');
+    const confirmPassword = formData.get('confirmPassword');
+    
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    
     try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -415,11 +424,11 @@ registerForm?.addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Registration successful! Please login.');
+            alert('Registration successful! Welcome to CarHub. Please login to continue.');
             registerModal.style.display = 'none';
             registerForm.reset();
         } else {
-            alert(data.error || 'Registration failed');
+            alert(data.message || 'Registration failed');
         }
     } catch (error) {
         console.error('Registration error:', error);
