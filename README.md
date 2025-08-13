@@ -110,11 +110,3 @@ car-site/
 - image (TEXT)
 - created_at (DATETIME)
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Commit your changes
-5. Push to the branch
-6. Create a Pull Request
