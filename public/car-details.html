@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Details - CarHub</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="View detailed information about this car listing on CarHub. Get complete specifications, features, and contact information.">
+    <meta name="keywords" content="car details, car specifications, car features, automotive, car listing">
+    <meta name="author" content="CarHub">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="car-details-page">
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <h2><a href="index.html" style="text-decoration: none; color: inherit;">CarHub</a></h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Cars</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Contact</a>
+                    </li>
+                    <li class="nav-item" id="loginNavItem">
+                        <a href="#" class="nav-link" id="loginBtn">Login</a>
+                    </li>
+                    <li class="nav-item" id="registerNavItem">
+                        <a href="#" class="nav-link" id="registerBtn">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-login.html" class="nav-link">Admin Panel</a>
+                    </li>
+                    <li class="nav-item" id="dashboardNavItem" style="display: none;">
+                        <a href="#" class="nav-link" id="dashboardBtn">Dashboard</a>
+                    </li>
+                    <li class="nav-item" id="favoritesNavItem" style="display: none;">
+                        <a href="#" class="nav-link" id="favoritesBtn">Favorites</a>
+                    </li>
+                    <li class="nav-item" id="logoutNavItem" style="display: none;">
+                        <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="car-details-page">
+        <div class="container">
+            <div class="back-button-container">
+                <button class="back-btn" onclick="goHome()">
+                    ← Back to Home
+                </button>
+            </div>
+            
+            <div id="carDetailsContainer">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; Berkin Tezel 2025 CarHub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name:</label>
+                    <input type="text" id="registerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email:</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password:</label>
+                    <input type="password" id="registerPassword" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password:</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('reviewModal')">&times;</span>
+            <h2>Leave a Review</h2>
+            <form id="reviewForm">
+                <div class="rating-input">
+                    <label>Rating:</label>
+                    <div class="star-rating">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="reviewRating" required>
+                </div>
+                <textarea id="reviewComment" placeholder="Write your review (optional)" rows="4"></textarea>
+                <button type="submit">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/car-details.js"></script>
+</body>
+</html>

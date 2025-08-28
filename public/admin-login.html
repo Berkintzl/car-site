@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Giriş - CarHub</title>
+    <title>Admin Login - CarHub</title>
     <style>
         * {
             margin: 0;
@@ -219,37 +219,37 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>Admin Paneli</h1>
-            <p>CarHub Yönetim Sistemi</p>
+            <h1>Admin Panel</h1>
+            <p>CarHub Management System</p>
         </div>
         
         <form class="login-form" id="adminLoginForm">
             <div id="alertContainer"></div>
             
             <div class="form-group">
-                <label for="email">E-posta Adresi</label>
+                <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" required autocomplete="username">
             </div>
             
             <div class="form-group">
-                <label for="password">Şifre</label>
+                <label for="password">Password</label>
                 <input type="password" id="password" name="password" required autocomplete="current-password">
             </div>
             
             <div class="remember-me">
                 <input type="checkbox" id="rememberMe" name="rememberMe">
-                <label for="rememberMe">Beni hatırla</label>
+                <label for="rememberMe">Remember me</label>
             </div>
             
             <button type="submit" class="login-btn" id="loginBtn">
-                Giriş Yap
+                Login
             </button>
             
             <div class="loading" id="loading"></div>
         </form>
         
         <div class="back-to-site">
-            <a href="/">← Ana Siteye Dön</a>
+            <a href="/">← Back to Main Site</a>
         </div>
     </div>
 
@@ -271,7 +271,7 @@
                 const rememberMe = document.getElementById('rememberMe').checked;
                 
                 if (!email || !password) {
-                    showAlert('Lütfen tüm alanları doldurun.', 'error');
+                    showAlert('Please fill in all fields.', 'error');
                     return;
                 }
                 
@@ -293,16 +293,16 @@
                     const data = await response.json();
                     
                     if (response.ok && data.success) {
-                        showAlert('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+                        showAlert('Login successful! Redirecting...', 'success');
                         setTimeout(() => {
                             window.location.href = '/admin.html';
                         }, 1000);
                     } else {
-                        showAlert(data.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.', 'error');
+                        showAlert(data.message || 'Login failed. Please check your credentials.', 'error');
                     }
                 } catch (error) {
                     console.error('Login error:', error);
-                    showAlert('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                    showAlert('An error occurred. Please try again.', 'error');
                 } finally {
                     setLoading(false);
                 }
@@ -324,7 +324,7 @@
             function setLoading(isLoading) {
                 loginBtn.disabled = isLoading;
                 loading.style.display = isLoading ? 'block' : 'none';
-                loginBtn.textContent = isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap';
+                loginBtn.textContent = isLoading ? 'Logging in...' : 'Login';
             }
             
             function showAlert(message, type) {

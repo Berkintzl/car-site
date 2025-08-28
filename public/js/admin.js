@@ -3,7 +3,6 @@
 // Global variables
 let currentSection = 'dashboard';
 let currentUser = null;
-let charts = {};
 
 // DOM Elements
 const navLinks = document.querySelectorAll('.nav-link[data-section]');
@@ -16,8 +15,89 @@ const adminLogout = document.getElementById('adminLogout');
 document.addEventListener('DOMContentLoaded', function() {
     checkAdminAuth();
     initializeEventListeners();
+    setupActionButtonListeners();
     loadDashboardData();
 });
+
+// Setup action button event listeners
+function setupActionButtonListeners() {
+    // User action buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('[data-user-id]')) {
+            const userId = e.target.getAttribute('data-user-id');
+            const action = e.target.getAttribute('data-action');
+            
+            switch(action) {
+                case 'view':
+                    viewUser(userId);
+                    break;
+                case 'edit':
+                    editUser(userId);
+                    break;
+                case 'delete':
+                    deleteUser(userId);
+                    break;
+            }
+        }
+        
+        // Car action buttons
+        if (e.target.matches('[data-car-id]')) {
+            const carId = e.target.getAttribute('data-car-id');
+            const action = e.target.getAttribute('data-action');
+            
+            switch(action) {
+                case 'view':
+                    viewCar(carId);
+                    break;
+                case 'delete':
+                    deleteCar(carId);
+                    break;
+            }
+        }
+        
+        // Review action buttons
+        if (e.target.matches('[data-review-id]')) {
+            const reviewId = e.target.getAttribute('data-review-id');
+            const action = e.target.getAttribute('data-action');
+            
+            switch(action) {
+                case 'approve':
+                    approveReview(reviewId);
+                    break;
+                case 'reject':
+                    rejectReview(reviewId);
+                    break;
+                case 'delete':
+                    deleteReview(reviewId);
+                    break;
+            }
+        }
+        
+        // Pagination buttons
+        if (e.target.matches('[data-page]')) {
+            const page = parseInt(e.target.getAttribute('data-page'));
+            const loadFunction = e.target.getAttribute('data-load-function');
+            
+            switch(loadFunction) {
+                case 'loadUsersData':
+                    loadUsersData(page);
+                    break;
+                case 'loadCarsData':
+                    loadCarsData(page);
+                    break;
+                case 'loadReviewsData':
+                    loadReviewsData(page);
+                    break;
+            }
+        }
+        
+        // Modal close buttons
+        if (e.target.matches('[data-action="close-modal"]')) {
+            const modal = e.target.getAttribute('data-modal');
+            closeModal(modal);
+        }
+    });
+}
 
 // Check admin authentication
 async function checkAdminAuth() {
@@ -96,14 +176,14 @@ function loadSectionData(section) {
             loadUsersData();
             break;
         case 'cars':
-            loadCarsData();
+            const carStatusFilter = document.getElementById('carStatusFilter');
+            const carSearch = document.getElementById('carSearch');
+            loadCarsData(1, carSearch?.value || '', carStatusFilter?.value || 'active');
             break;
         case 'reviews':
             loadReviewsData();
             break;
-        case 'analytics':
-            loadAnalyticsData();
-            break;
+
         case 'settings':
             loadSettingsData();
             break;
@@ -150,45 +230,8 @@ function updateRecentActivity(activities) {
 }
 
 function createDashboardCharts(chartData) {
-    // User registration chart
-    const userCtx = document.getElementById('userChart').getContext('2d');
-    if (charts.userChart) charts.userChart.destroy();
-    charts.userChart = new Chart(userCtx, {
-        type: 'line',
-        data: {
-            labels: chartData.userRegistrations.labels,
-            datasets: [{
-                label: 'New Users',
-                data: chartData.userRegistrations.data,
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-    
-    // Listing activity chart
-    const listingCtx = document.getElementById('listingChart').getContext('2d');
-    if (charts.listingChart) charts.listingChart.destroy();
-    charts.listingChart = new Chart(listingCtx, {
-        type: 'bar',
-        data: {
-            labels: chartData.listingActivity.labels,
-            datasets: [{
-                label: 'New Listings',
-                data: chartData.listingActivity.data,
-                backgroundColor: '#2ecc71'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
+    // Charts removed - no Chart.js dependency
+    console.log('Chart data received:', chartData);
 }
 
 // Users management
@@ -223,9 +266,9 @@ function updateUsersTable(users) {
             <td><span class="status ${user.status || 'active'}">${user.status || 'active'}</span></td>
             <td>
                 <div class="action-buttons">
-                    <button class="action-btn view" onclick="viewUser(${user.id})">View</button>
-                    <button class="action-btn edit" onclick="editUser(${user.id})">Edit</button>
-                    <button class="action-btn delete" onclick="deleteUser(${user.id})">Delete</button>
+                    <button class="action-btn view" data-action="view" data-user-id="${user.id}">View</button>
+                    <button class="action-btn edit" data-action="edit" data-user-id="${user.id}">Edit</button>
+                    <button class="action-btn delete" data-action="delete" data-user-id="${user.id}">Delete</button>
                 </div>
             </td>
         </tr>
@@ -266,10 +309,8 @@ function updateCarsTable(cars) {
             <td>${formatDate(car.created_at)}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="action-btn view" onclick="viewCar(${car.id})">View</button>
-                    <button class="action-btn approve" onclick="approveCar(${car.id})">Approve</button>
-                    <button class="action-btn reject" onclick="rejectCar(${car.id})">Reject</button>
-                    <button class="action-btn delete" onclick="deleteCar(${car.id})">Delete</button>
+                    <button class="action-btn view" data-action="view" data-car-id="${car.id}">View</button>
+                    <button class="action-btn delete" data-action="delete" data-car-id="${car.id}">Delete</button>
                 </div>
             </td>
         </tr>
@@ -316,125 +357,16 @@ function updateReviewsContainer(reviews) {
                 <span>Car: ${review.car_make} ${review.car_model}</span>
                 <span>${formatDate(review.created_at)}</span>
             </div>
-            <div class="action-buttons" style="margin-top: 15px;">
-                <button class="action-btn approve" onclick="approveReview(${review.id})">Approve</button>
-                <button class="action-btn reject" onclick="rejectReview(${review.id})">Reject</button>
-                <button class="action-btn delete" onclick="deleteReview(${review.id})">Delete</button>
-            </div>
+            <div class="review-actions">
+                    <button class="action-btn approve" data-action="approve" data-review-id="${review.id}">Approve</button>
+                    <button class="action-btn reject" data-action="reject" data-review-id="${review.id}">Reject</button>
+                    <button class="action-btn delete" data-action="delete" data-review-id="${review.id}">Delete</button>
+                </div>
         </div>
     `).join('');
 }
 
-// Analytics
-async function loadAnalyticsData() {
-    try {
-        const response = await fetch('/api/admin/analytics');
-        const data = await response.json();
-        
-        if (response.ok) {
-            createAnalyticsCharts(data);
-        }
-    } catch (error) {
-        console.error('Failed to load analytics data:', error);
-    }
-}
 
-function createAnalyticsCharts(data) {
-    // Traffic chart
-    const trafficCtx = document.getElementById('trafficChart').getContext('2d');
-    if (charts.trafficChart) charts.trafficChart.destroy();
-    charts.trafficChart = new Chart(trafficCtx, {
-        type: 'line',
-        data: {
-            labels: data.traffic.labels,
-            datasets: [{
-                label: 'Page Views',
-                data: data.traffic.pageViews,
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)'
-            }, {
-                label: 'Unique Visitors',
-                data: data.traffic.uniqueVisitors,
-                borderColor: '#e74c3c',
-                backgroundColor: 'rgba(231, 76, 60, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-    
-    // Popular makes chart
-    const makesCtx = document.getElementById('makesChart').getContext('2d');
-    if (charts.makesChart) charts.makesChart.destroy();
-    charts.makesChart = new Chart(makesCtx, {
-        type: 'doughnut',
-        data: {
-            labels: data.popularMakes.labels,
-            datasets: [{
-                data: data.popularMakes.data,
-                backgroundColor: [
-                    '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6',
-                    '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#f1c40f'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-    
-    // Revenue chart
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    if (charts.revenueChart) charts.revenueChart.destroy();
-    charts.revenueChart = new Chart(revenueCtx, {
-        type: 'bar',
-        data: {
-            labels: data.revenue.labels,
-            datasets: [{
-                label: 'Revenue',
-                data: data.revenue.data,
-                backgroundColor: '#2ecc71'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    }
-                }
-            }
-        }
-    });
-    
-    // Engagement chart
-    const engagementCtx = document.getElementById('engagementChart').getContext('2d');
-    if (charts.engagementChart) charts.engagementChart.destroy();
-    charts.engagementChart = new Chart(engagementCtx, {
-        type: 'radar',
-        data: {
-            labels: ['Searches', 'Favorites', 'Contacts', 'Reviews', 'Shares'],
-            datasets: [{
-                label: 'User Engagement',
-                data: data.engagement.data,
-                borderColor: '#9b59b6',
-                backgroundColor: 'rgba(155, 89, 182, 0.2)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-}
 
 // Settings
 async function loadSettingsData() {
@@ -569,15 +501,7 @@ function setupFormSubmissions() {
         });
     }
     
-    // Analytics date range
-    const generateReport = document.getElementById('generateReport');
-    if (generateReport) {
-        generateReport.addEventListener('click', () => {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            generateAnalyticsReport(startDate, endDate);
-        });
-    }
+
     
     // Export buttons
     const exportCSV = document.getElementById('exportCSV');
@@ -619,15 +543,15 @@ function updatePagination(containerId, pagination, loadFunction) {
     let html = '';
     
     if (hasPrev) {
-        html += `<button onclick="${loadFunction.name}(${currentPage - 1})">Previous</button>`;
+        html += `<button data-page="${currentPage - 1}" data-load-function="${loadFunction.name}">Previous</button>`;
     }
     
     for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
-        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="${loadFunction.name}(${i})">${i}</button>`;
+        html += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}" data-load-function="${loadFunction.name}">${i}</button>`;
     }
     
     if (hasNext) {
-        html += `<button onclick="${loadFunction.name}(${currentPage + 1})">Next</button>`;
+        html += `<button data-page="${currentPage + 1}" data-load-function="${loadFunction.name}">Next</button>`;
     }
     
     container.innerHTML = html;
@@ -673,27 +597,36 @@ async function viewUser(userId) {
 }
 
 async function editUser(userId) {
-    // Implementation for editing user
-    console.log('Edit user:', userId);
+    try {
+        const response = await fetch(`/api/admin/users/${userId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            showEditUserModal(data.user);
+        }
+    } catch (error) {
+        console.error('Failed to load user details:', error);
+    }
 }
 
 async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    
-    try {
-        const response = await fetch(`/api/admin/users/${userId}`, {
-            method: 'DELETE'
-        });
-        
-        if (response.ok) {
-            showAlert('User deleted successfully', 'success');
-            loadUsersData();
-        } else {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                showAlert('User deleted successfully', 'success');
+                loadUsersData();
+            } else {
+                const errorData = await response.json();
+                showAlert(errorData.message || 'Failed to delete user', 'error');
+            }
+        } catch (error) {
+            console.error('Failed to delete user:', error);
             showAlert('Failed to delete user', 'error');
         }
-    } catch (error) {
-        console.error('Failed to delete user:', error);
-        showAlert('Failed to delete user', 'error');
     }
 }
 
@@ -710,41 +643,7 @@ async function viewCar(carId) {
     }
 }
 
-async function approveCar(carId) {
-    try {
-        const response = await fetch(`/api/admin/cars/${carId}/approve`, {
-            method: 'POST'
-        });
-        
-        if (response.ok) {
-            showAlert('Car approved successfully', 'success');
-            loadCarsData();
-        } else {
-            showAlert('Failed to approve car', 'error');
-        }
-    } catch (error) {
-        console.error('Failed to approve car:', error);
-        showAlert('Failed to approve car', 'error');
-    }
-}
 
-async function rejectCar(carId) {
-    try {
-        const response = await fetch(`/api/admin/cars/${carId}/reject`, {
-            method: 'POST'
-        });
-        
-        if (response.ok) {
-            showAlert('Car rejected successfully', 'success');
-            loadCarsData();
-        } else {
-            showAlert('Failed to reject car', 'error');
-        }
-    } catch (error) {
-        console.error('Failed to reject car:', error);
-        showAlert('Failed to reject car', 'error');
-    }
-}
 
 async function deleteCar(carId) {
     if (!confirm('Are you sure you want to delete this car listing?')) return;
@@ -840,22 +739,7 @@ async function saveSettings(type, formData) {
     }
 }
 
-async function generateAnalyticsReport(startDate, endDate) {
-    try {
-        const response = await fetch(`/api/admin/analytics/report?start=${startDate}&end=${endDate}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-            createAnalyticsCharts(data);
-            showAlert('Report generated successfully', 'success');
-        } else {
-            showAlert('Failed to generate report', 'error');
-        }
-    } catch (error) {
-        console.error('Failed to generate report:', error);
-        showAlert('Failed to generate report', 'error');
-    }
-}
+
 
 async function exportData(format) {
     try {
@@ -900,6 +784,92 @@ function showUserModal(user) {
     `;
     
     modal.style.display = 'block';
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function showEditUserModal(user) {
+    const modal = document.getElementById('userModal');
+    const title = document.getElementById('userModalTitle');
+    const content = document.getElementById('userModalContent');
+    
+    title.textContent = 'Edit User';
+    
+    content.innerHTML = `
+        <form id="editUserForm" class="edit-form">
+            <div class="form-group">
+                <label for="editUserName">Name:</label>
+                <input type="text" id="editUserName" value="${user.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="editUserEmail">Email:</label>
+                <input type="email" id="editUserEmail" value="${user.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="editUserPhone">Phone:</label>
+                <input type="text" id="editUserPhone" value="${user.phone || ''}">
+            </div>
+            <div class="form-group">
+                <label for="editUserStatus">Status:</label>
+                <select id="editUserStatus">
+                    <option value="active" ${(user.status || 'active') === 'active' ? 'selected' : ''}>Active</option>
+                    <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                    <option value="banned" ${user.status === 'banned' ? 'selected' : ''}>Banned</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update User</button>
+                <button type="button" class="btn btn-secondary" data-action="close-modal" data-modal="userModal">Cancel</button>
+            </div>
+        </form>
+    `;
+    
+    modal.style.display = 'block';
+    
+    // Add form submit event listener
+    document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateUser(user.id);
+    });
+}
+
+async function updateUser(userId) {
+    const name = document.getElementById('editUserName').value;
+    const email = document.getElementById('editUserEmail').value;
+    const phone = document.getElementById('editUserPhone').value;
+    const status = document.getElementById('editUserStatus').value;
+    
+    try {
+        const response = await fetch(`/api/admin/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name,
+                email,
+                phone,
+                status
+            })
+        });
+        
+        if (response.ok) {
+            showAlert('User updated successfully', 'success');
+            closeModal('userModal');
+            loadUsersData();
+        } else {
+            const errorData = await response.json();
+            showAlert(errorData.message || 'Failed to update user', 'error');
+        }
+    } catch (error) {
+        console.error('Failed to update user:', error);
+        showAlert('Failed to update user', 'error');
+    }
 }
 
 function showCarModal(car) {
@@ -951,9 +921,4 @@ async function logout() {
     }
 }
 
-// Load Chart.js if not already loaded
-if (typeof Chart === 'undefined') {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-    document.head.appendChild(script);
-}
+// Chart.js dependency removed

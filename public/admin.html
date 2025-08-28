@@ -19,7 +19,7 @@
                 <li><a href="#users" class="nav-link" data-section="users">Users</a></li>
                 <li><a href="#cars" class="nav-link" data-section="cars">Car Listings</a></li>
                 <li><a href="#reviews" class="nav-link" data-section="reviews">Reviews</a></li>
-                <li><a href="#analytics" class="nav-link" data-section="analytics">Analytics</a></li>
+
                 <li><a href="#settings" class="nav-link" data-section="settings">Settings</a></li>
                 <li><a href="/" class="nav-link">Back to Site</a></li>
                 <li><a href="#" id="adminLogout" class="nav-link">Logout</a></li>
@@ -56,16 +56,7 @@
                         </div>
                     </div>
 
-                    <div class="charts-container">
-                        <div class="chart-card">
-                            <h3>User Registration Trend</h3>
-                            <canvas id="userChart" width="400" height="200"></canvas>
-                        </div>
-                        <div class="chart-card">
-                            <h3>Listing Activity</h3>
-                            <canvas id="listingChart" width="400" height="200"></canvas>
-                        </div>
-                    </div>
+                    <!-- Charts removed - no Chart.js dependency -->
 
                     <div class="recent-activity">
                         <h3>Recent Activity</h3>
@@ -113,7 +104,7 @@
                         <div class="filter-controls">
                             <select id="carStatusFilter">
                                 <option value="all">All Status</option>
-                                <option value="active">Active</option>
+                                <option value="active" selected>Active</option>
                                 <option value="pending">Pending</option>
                                 <option value="rejected">Rejected</option>
                                 <option value="sold">Sold</option>
@@ -172,43 +163,7 @@
                     </div>
                 </section>
 
-                <!-- Analytics Section -->
-                <section id="analytics" class="admin-section">
-                    <div class="section-header">
-                        <h2>Analytics & Reports</h2>
-                        <div class="date-range">
-                            <input type="date" id="startDate">
-                            <input type="date" id="endDate">
-                            <button id="generateReport">Generate Report</button>
-                        </div>
-                    </div>
-                    
-                    <div class="analytics-grid">
-                        <div class="analytics-card">
-                            <h3>Traffic Overview</h3>
-                            <canvas id="trafficChart" width="400" height="300"></canvas>
-                        </div>
-                        <div class="analytics-card">
-                            <h3>Popular Car Makes</h3>
-                            <canvas id="makesChart" width="400" height="300"></canvas>
-                        </div>
-                        <div class="analytics-card">
-                            <h3>Revenue Trends</h3>
-                            <canvas id="revenueChart" width="400" height="300"></canvas>
-                        </div>
-                        <div class="analytics-card">
-                            <h3>User Engagement</h3>
-                            <canvas id="engagementChart" width="400" height="300"></canvas>
-                        </div>
-                    </div>
 
-                    <div class="export-section">
-                        <h3>Export Reports</h3>
-                        <button id="exportCSV" class="export-btn">Export as CSV</button>
-                        <button id="exportPDF" class="export-btn">Export as PDF</button>
-                        <button id="exportExcel" class="export-btn">Export as Excel</button>
-                    </div>
-                </section>
 
                 <!-- Settings Section -->
                 <section id="settings" class="admin-section">
@@ -305,7 +260,7 @@
     <!-- Modals -->
     <div id="userModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" data-action="close-modal" data-modal="userModal">&times;</span>
             <h2 id="userModalTitle">User Details</h2>
             <div id="userModalContent">
                 <!-- User details will be loaded here -->
@@ -315,7 +270,7 @@
 
     <div id="carModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" data-action="close-modal" data-modal="carModal">&times;</span>
             <h2 id="carModalTitle">Car Details</h2>
             <div id="carModalContent">
                 <!-- Car details will be loaded here -->
@@ -325,7 +280,7 @@
 
     <div id="reviewModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" data-action="close-modal" data-modal="reviewModal">&times;</span>
             <h2 id="reviewModalTitle">Review Details</h2>
             <div id="reviewModalContent">
                 <!-- Review details will be loaded here -->

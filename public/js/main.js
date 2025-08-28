@@ -36,11 +36,233 @@ let userFavorites = [];
 let comparisonList = [];
 let maxComparisonItems = 4;
 
+// Notification function
+function showNotification(message, type = 'info') {
+    // Remove existing notification if any
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span class="notification-message">${message}</span>
+        <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
 // Mobile menu toggle
 hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('active');
     navMenu.classList.toggle('active');
 });
+
+// Header navigation functionality
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const linkText = e.target.textContent.trim();
+        
+        // Skip login/register/dashboard/favorites/logout/admin panel buttons
+        if (['Login', 'Register', 'Dashboard', 'Favorites', 'Logout', 'Admin Panel'].includes(linkText)) {
+            return;
+        }
+        
+        e.preventDefault();
+        
+        // Close mobile menu if open
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+        
+        // Handle navigation
+        switch(linkText) {
+            case 'Home':
+                scrollToSection('hero');
+                break;
+            case 'Cars':
+                scrollToSection('featuredCars');
+                loadCars();
+                break;
+            case 'About':
+                showAboutModal();
+                break;
+            case 'Contact':
+                showContactModal();
+                break;
+        }
+    });
+});
+
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId) || document.querySelector(`.${sectionId}`);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function showAboutModal() {
+    const aboutModal = document.createElement('div');
+    aboutModal.className = 'modal';
+    aboutModal.innerHTML = `
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>About CarHub</h2>
+            <div class="about-content">
+                <p>CarHub is your trusted platform for buying and selling quality cars. We connect car enthusiasts, dealers, and buyers in a secure and user-friendly environment.</p>
+                
+                <h3>Our Mission</h3>
+                <p>To make car buying and selling simple, transparent, and trustworthy for everyone.</p>
+                
+                <h3>Why Choose CarHub?</h3>
+                <ul>
+                    <li>✓ Verified listings from trusted sellers</li>
+                    <li>✓ Advanced search and filtering options</li>
+                    <li>✓ Detailed car information and photos</li>
+                    <li>✓ User reviews and ratings</li>
+                    <li>✓ Secure messaging system</li>
+                    <li>✓ Mobile-friendly platform</li>
+                </ul>
+                
+                <h3>Contact Information</h3>
+                <p>Email: info@carhub.com<br>
+                Phone: +1 (555) 123-4567<br>
+                Address: 123 Car Street, Auto City, AC 12345</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(aboutModal);
+    aboutModal.style.display = 'block';
+    
+    // Close modal functionality
+    const closeBtn = aboutModal.querySelector('.close');
+    closeBtn.addEventListener('click', () => {
+        document.body.removeChild(aboutModal);
+    });
+    
+    aboutModal.addEventListener('click', (e) => {
+        if (e.target === aboutModal) {
+            document.body.removeChild(aboutModal);
+        }
+    });
+}
+
+function showContactModal() {
+    const contactModal = document.createElement('div');
+    contactModal.className = 'modal';
+    contactModal.innerHTML = `
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Contact Us</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Get in Touch</h3>
+                    <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+                    
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <strong>📧 Email:</strong> info@carhub.com
+                        </div>
+                        <div class="contact-item">
+                            <strong>📞 Phone:</strong> +1 (555) 123-4567
+                        </div>
+                        <div class="contact-item">
+                            <strong>📍 Address:</strong> 123 Car Street, Auto City, AC 12345
+                        </div>
+                        <div class="contact-item">
+                            <strong>🕒 Hours:</strong> Mon-Fri 9AM-6PM, Sat 10AM-4PM
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <h3>Send Message</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="contactName">Name:</label>
+                            <input type="text" id="contactName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Email:</label>
+                            <input type="email" id="contactEmail" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactSubject">Subject:</label>
+                            <input type="text" id="contactSubject" name="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMessage">Message:</label>
+                            <textarea id="contactMessage" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(contactModal);
+    contactModal.style.display = 'block';
+    
+    // Close modal functionality
+    const closeBtn = contactModal.querySelector('.close');
+    closeBtn.addEventListener('click', () => {
+        document.body.removeChild(contactModal);
+    });
+    
+    contactModal.addEventListener('click', (e) => {
+        if (e.target === contactModal) {
+            document.body.removeChild(contactModal);
+        }
+    });
+    
+    // Contact form functionality
+    const contactForm = contactModal.querySelector('#contactForm');
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(contactForm);
+        const contactData = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            subject: formData.get('subject'),
+            message: formData.get('message')
+        };
+        
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(contactData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert('Thank you for your message! We will get back to you soon.');
+                document.body.removeChild(contactModal);
+            } else {
+                alert(data.message || 'Failed to send message');
+            }
+        } catch (error) {
+             console.error('Contact form error:', error);
+             alert('An error occurred while sending your message');
+         }
+     });
+}
 
 // Modal functionality
 loginBtn?.addEventListener('click', (e) => {
@@ -58,11 +280,35 @@ dashboardBtn?.addEventListener('click', () => {
     loadDashboardData();
 });
 
+favoritesBtn?.addEventListener('click', () => {
+    if (!currentUser) {
+        showNotification('Please login to view favorites', 'warning');
+        loginModal.style.display = 'block';
+        return;
+    }
+    dashboardModal.style.display = 'block';
+    loadDashboardData();
+    // Switch to favorites tab
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('[data-tab="favorites"]').classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById('favoritesTab').classList.add('active');
+});
+
 advancedFiltersBtn?.addEventListener('click', () => {
     filtersModal.style.display = 'block';
 });
 
 addCarBtn?.addEventListener('click', () => {
+    console.log('Add Car button clicked');
+    
+    // Check if user is logged in
+    if (!currentUser) {
+        alert('You must log in first to add a car.');
+        loginModal.style.display = 'block';
+        return;
+    }
+    
     carModal.style.display = 'block';
     document.getElementById('carModalTitle').textContent = 'Add New Car';
     document.getElementById('carSubmitBtn').textContent = 'Add Car';
@@ -101,13 +347,26 @@ function toggleComparison(carId) {
     if (index > -1) {
         // Remove from comparison
         comparisonList.splice(index, 1);
+        showNotification('Car removed from comparison', 'info');
     } else {
         // Add to comparison (max 4 items)
         if (comparisonList.length >= maxComparisonItems) {
-            alert(`You can compare maximum ${maxComparisonItems} cars at once.`);
+            showNotification(`You can compare maximum ${maxComparisonItems} cars at once.`, 'warning');
             return;
         }
         comparisonList.push(carId);
+        
+        if (comparisonList.length === 1) {
+            showNotification('Car added to comparison! Select another car to compare.', 'success');
+        } else if (comparisonList.length === 2) {
+            showNotification('Ready to compare! Click the Compare button or select more cars.', 'success');
+            // Auto-open comparison modal when 2 cars are selected
+            setTimeout(() => {
+                openComparisonModal();
+            }, 1500);
+        } else {
+            showNotification('Car added to comparison!', 'success');
+        }
     }
     
     updateComparisonUI();
@@ -189,7 +448,7 @@ function clearComparison() {
 
 async function startComparison() {
     if (comparisonList.length < 2) {
-        alert('Please select at least 2 cars to compare.');
+        showNotification('Please select at least 2 cars to compare.', 'warning');
         return;
     }
     
@@ -465,7 +724,7 @@ passwordForm?.addEventListener('submit', async (e) => {
     const formData = new FormData(passwordForm);
     
     if (formData.get('newPassword') !== formData.get('confirmNewPassword')) {
-        alert('New passwords do not match');
+        showNotification('New passwords do not match', 'error');
         return;
     }
     
@@ -484,14 +743,14 @@ passwordForm?.addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Password changed successfully!');
+            showNotification('Password changed successfully!', 'success');
             passwordForm.reset();
         } else {
-            alert(data.error || 'Password change failed');
+            showNotification(data.error || 'Password change failed', 'error');
         }
     } catch (error) {
         console.error('Password change error:', error);
-        alert('An error occurred while changing password');
+        showNotification('An error occurred while changing password', 'error');
     }
 });
 
@@ -499,29 +758,50 @@ carForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(carForm);
     
-    const features = formData.get('carFeatures').split(',').map(f => f.trim()).filter(f => f);
+    const featuresValue = formData.get('carFeatures') || '';
+    const features = featuresValue.split(',').map(f => f.trim()).filter(f => f);
     formData.set('features', JSON.stringify(features));
     
+    const submitBtn = document.getElementById('carSubmitBtn');
+    const editId = submitBtn?.dataset.editId;
+    
     try {
-        const response = await fetch('/api/cars', {
-            method: 'POST',
-            body: formData
-        });
+        let response;
+        if (editId) {
+            // Edit mode - PUT request
+            response = await fetch(`/api/cars/${editId}`, {
+                method: 'PUT',
+                body: formData
+            });
+        } else {
+            // Add mode - POST request
+            response = await fetch('/api/cars', {
+                method: 'POST',
+                body: formData
+            });
+        }
         
         const data = await response.json();
         
         if (response.ok) {
-            alert('Car added successfully!');
+            showNotification(editId ? 'Car updated successfully!' : 'Car added successfully!', 'success');
             carModal.style.display = 'none';
             carForm.reset();
+            
+            // Reset form to add mode
+            if (submitBtn) {
+                submitBtn.textContent = 'Add Car';
+                delete submitBtn.dataset.editId;
+            }
+            
             loadCars();
             loadUserListings();
         } else {
-            alert(data.error || 'Failed to add car');
+            showNotification(data.error || (editId ? 'Failed to update car' : 'Failed to add car'), 'error');
         }
     } catch (error) {
         console.error('Car submission error:', error);
-        alert('An error occurred while adding car');
+        showNotification(editId ? 'An error occurred while updating car' : 'An error occurred while adding car', 'error');
     }
 });
 
@@ -536,7 +816,7 @@ async function loadCars() {
         const data = await response.json();
         
         if (response.ok) {
-            allCars = data.cars || [];
+            allCars = data || [];
             displayCars(allCars);
         }
     } catch (error) {
@@ -582,7 +862,7 @@ function applyFilters() {
 }
 
 function displayCars(cars) {
-    const container = document.getElementById('featuredCars') || document.querySelector('.cars-grid');
+    const container = document.getElementById('carsGrid') || document.querySelector('.cars-grid');
     if (!container) return;
     
     if (cars.length === 0) {
@@ -591,27 +871,31 @@ function displayCars(cars) {
     }
     
     container.innerHTML = cars.map(car => {
-        const features = car.features ? JSON.parse(car.features) : [];
         const isFavorite = userFavorites.includes(car.id);
         
         return `
-            <div class="car-card">
-                <img src="${car.image_url || '/images/default-car.jpg'}" alt="${car.make} ${car.model}" class="car-image">
+            <div class="car-card compact">
+                <div class="car-image-container">
+                    <img src="${car.image ? '/uploads/' + car.image : '/images/default-car.jpg'}" alt="${car.make} ${car.model}" class="car-image">
+                    <button class="favorite-btn-overlay ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${car.id})" title="${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}">
+                        ${isFavorite ? '❤️' : '🤍'}
+                    </button>
+                </div>
                 <div class="car-info">
-                    <div class="car-title">${car.make} ${car.model} (${car.year})</div>
-                    <div class="car-price">$${car.price.toLocaleString()}</div>
-                    <div class="car-details">
-                        <p>${car.mileage.toLocaleString()} miles • ${car.fuel_type} • ${car.transmission}</p>
-                        ${car.body_type ? `<p>Body Type: ${car.body_type}</p>` : ''}
-                        ${car.color ? `<p>Color: ${car.color}</p>` : ''}
+                    <div class="car-header">
+                        <div class="car-title">${car.make} ${car.model}</div>
+                        <div class="car-year">${car.year}</div>
                     </div>
-                    <p class="car-description">${car.description}</p>
-                    ${features.length > 0 ? `<p><strong>Features:</strong> ${features.join(', ')}</p>` : ''}
+                    <div class="car-price">$${car.price.toLocaleString()}</div>
+                    <div class="car-specs">
+                        <span class="spec-item">${car.mileage.toLocaleString()} mi</span>
+                        <span class="spec-item">${car.fuel_type}</span>
+                        <span class="spec-item">${car.transmission}</span>
+                    </div>
                     <div class="car-actions">
-                        <button onclick="viewCarDetails(${car.id})">View Details</button>
-                        ${currentUser ? `<button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${car.id})">${isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}</button>` : ''}
-                        <button onclick="toggleComparison(${car.id})" class="btn ${comparisonList.includes(car.id) ? 'btn-warning' : 'btn-outline'}">
-                            ${comparisonList.includes(car.id) ? 'Remove from Compare' : 'Compare'}
+                        <button class="btn-primary" onclick="viewCarDetails(${car.id})">View Details</button>
+                        <button class="btn-compare ${comparisonList.includes(car.id) ? 'active' : ''}" onclick="toggleComparison(${car.id})" title="${comparisonList.includes(car.id) ? 'Remove from Compare' : 'Add to Compare'}">
+                            ⚖️
                         </button>
                     </div>
                 </div>
@@ -621,30 +905,8 @@ function displayCars(cars) {
 }
 
 async function viewCarDetails(carId) {
-    try {
-        // Fetch car details
-        const carResponse = await fetch(`/api/cars/${carId}`);
-        const car = await carResponse.json();
-        
-        if (!carResponse.ok) {
-            throw new Error(car.message || 'Failed to load car details');
-        }
-        
-        // Fetch seller reputation
-        const reputationResponse = await fetch(`/api/user/${car.user_id}/reputation`);
-        const reputation = await reputationResponse.json();
-        
-        // Fetch reviews for this seller
-        const reviewsResponse = await fetch(`/api/reviews/user/${car.user_id}`);
-        const reviews = await reviewsResponse.json();
-        
-        // Display car details modal
-        displayCarDetailsModal(car, reputation, reviews);
-        
-    } catch (error) {
-        console.error('Error loading car details:', error);
-        alert('Failed to load car details');
-    }
+    // Redirect to car details page
+    window.location.href = `car-details.html?id=${carId}`;
 }
 
 function displayCarDetailsModal(car, reputation, reviews) {
@@ -906,7 +1168,7 @@ function showReviewModal(userId, carId) {
 
 async function toggleFavorite(carId) {
     if (!currentUser) {
-        alert('Please login to add favorites');
+        showNotification('Please login to add favorites', 'warning');
         return;
     }
     
@@ -921,13 +1183,18 @@ async function toggleFavorite(carId) {
         if (response.ok) {
             if (isFavorite) {
                 userFavorites = userFavorites.filter(id => id !== carId);
+                showNotification('Removed from favorites!', 'success');
             } else {
                 userFavorites.push(carId);
+                showNotification('Added to favorites!', 'success');
             }
             displayCars(allCars);
+        } else {
+            showNotification('Failed to update favorites', 'error');
         }
     } catch (error) {
         console.error('Error toggling favorite:', error);
+        showNotification('Failed to update favorites', 'error');
     }
 }
 
@@ -939,7 +1206,7 @@ async function loadUserFavorites() {
         const data = await response.json();
         
         if (response.ok) {
-            userFavorites = data.favorites.map(f => f.car_id);
+            userFavorites = data.map(f => f.car_id);
             
             const favoriteCars = allCars.filter(car => userFavorites.includes(car.id));
             const container = document.getElementById('userFavorites');
@@ -980,9 +1247,46 @@ async function loadDashboardData() {
 }
 
 async function loadUserListings() {
+    if (!currentUser) return;
+    
     const container = document.getElementById('userListings');
-    if (container) {
-        container.innerHTML = '<p>User listings feature coming soon...</p>';
+    if (!container) return;
+    
+    try {
+        const response = await fetch('/api/user-cars');
+        const data = await response.json();
+        
+        if (response.ok) {
+            if (data.cars.length === 0) {
+                container.innerHTML = '<p>You haven\'t listed any cars yet. <button onclick="document.getElementById(\'addCarBtn\').click()">Add Your First Car</button></p>';
+            } else {
+                container.innerHTML = data.cars.map(car => `
+                    <div class="user-car-item">
+                        <div class="car-image">
+                            <img src="${car.image || '/images/default-car.jpg'}" alt="${car.make} ${car.model}" onerror="this.src='/images/default-car.jpg'">
+                        </div>
+                        <div class="car-info">
+                            <h4>${car.make} ${car.model} (${car.year})</h4>
+                            <p class="price">$${parseFloat(car.price).toLocaleString()}</p>
+                            <p class="details">${car.mileage.toLocaleString()} miles • ${car.fuel_type} • ${car.transmission}</p>
+                            <p class="status">Status: <span class="${car.status === 'active' ? 'active' : 'inactive'}">${car.status}</span></p>
+                            <div class="car-actions">
+                                <button onclick="editCar(${car.id})" class="edit-btn">Edit</button>
+                                <button onclick="toggleCarStatus(${car.id}, '${car.status}')" class="status-btn">
+                                    ${car.status === 'active' ? 'Deactivate' : 'Activate'}
+                                </button>
+                                <button onclick="deleteCar(${car.id})" class="delete-btn">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } else {
+            container.innerHTML = '<p>Error loading your listings. Please try again.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading user listings:', error);
+        container.innerHTML = '<p>Error loading your listings. Please try again.</p>';
     }
 }
 
@@ -1018,6 +1322,93 @@ async function loadSavedSearches() {
 
 function applySavedSearch(criteria) {
     alert('Applying saved search: ' + criteria);
+}
+
+// User car management functions
+async function editCar(carId) {
+    try {
+        const response = await fetch(`/api/cars/${carId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            const car = data;
+            // Populate the car form with existing data
+            document.getElementById('carMake').value = car.make || '';
+            document.getElementById('carModel').value = car.model || '';
+            document.getElementById('carYear').value = car.year || '';
+            document.getElementById('carPrice').value = car.price || '';
+            document.getElementById('carMileage').value = car.mileage || '';
+            document.getElementById('carFuelType').value = car.fuel_type || '';
+            document.getElementById('carTransmission').value = car.transmission || '';
+            document.getElementById('carBodyType').value = car.body_type || '';
+            document.getElementById('carColor').value = car.color || '';
+            document.getElementById('carEngineSize').value = car.engine_size || '';
+            document.getElementById('carDoors').value = car.doors || '';
+            document.getElementById('carSeats').value = car.seats || '';
+            document.getElementById('carCondition').value = car.condition || '';
+            document.getElementById('carDescription').value = car.description || '';
+            document.getElementById('carFeatures').value = car.features || '';
+            
+            // Change form to edit mode
+            const submitBtn = document.getElementById('carSubmitBtn');
+            submitBtn.textContent = 'Update Car';
+            submitBtn.dataset.editId = carId;
+            
+            // Open the car modal
+            carModal.style.display = 'block';
+        } else {
+            showNotification('Error loading car details', 'error');
+        }
+    } catch (error) {
+        console.error('Error editing car:', error);
+        showNotification('Error loading car details', 'error');
+    }
+}
+
+async function toggleCarStatus(carId, currentStatus) {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    
+    try {
+        const response = await fetch(`/api/cars/${carId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (response.ok) {
+            loadUserListings(); // Reload the listings
+            showNotification(`Car ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`, 'success');
+        } else {
+            showNotification('Error updating car status', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling car status:', error);
+        showNotification('Error updating car status', 'error');
+    }
+}
+
+async function deleteCar(carId) {
+    if (!confirm('Are you sure you want to delete this car listing?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/cars/${carId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            loadUserListings(); // Reload the listings
+            showNotification('Car deleted successfully', 'success');
+        } else {
+            showNotification('Error deleting car', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting car:', error);
+        showNotification('Error deleting car', 'error');
+    }
 }
 
 async function deleteSavedSearch(searchId) {
@@ -1057,6 +1448,7 @@ function updateNavigation(isLoggedIn) {
     const dashboardNav = document.getElementById('dashboardBtn');
     const favoritesNav = document.getElementById('favoritesBtn');
     const logoutNav = document.getElementById('logoutBtn');
+    const addCarButton = document.getElementById('addCarBtn');
     
     if (isLoggedIn) {
         loginNav?.parentElement.style.setProperty('display', 'none');
@@ -1064,18 +1456,20 @@ function updateNavigation(isLoggedIn) {
         dashboardNav?.parentElement.style.setProperty('display', 'block');
         favoritesNav?.parentElement.style.setProperty('display', 'block');
         logoutNav?.parentElement.style.setProperty('display', 'block');
+        if (addCarButton) addCarButton.style.display = 'block';
     } else {
         loginNav?.parentElement.style.setProperty('display', 'block');
         registerNav?.parentElement.style.setProperty('display', 'block');
         dashboardNav?.parentElement.style.setProperty('display', 'none');
         favoritesNav?.parentElement.style.setProperty('display', 'none');
         logoutNav?.parentElement.style.setProperty('display', 'none');
+        if (addCarButton) addCarButton.style.display = 'none';
     }
 }
 
 logoutBtn?.addEventListener('click', async () => {
     try {
-        const response = await fetch('/api/auth/logout', {
+        const response = await fetch('/api/logout', {
             method: 'POST'
         });
         
@@ -1083,10 +1477,15 @@ logoutBtn?.addEventListener('click', async () => {
             currentUser = null;
             userFavorites = [];
             updateNavigation(false);
-            alert('Logged out successfully');
+            showNotification('Logged out successfully', 'success');
+            // Redirect to home page or refresh
+            window.location.reload();
+        } else {
+            showNotification('Failed to logout', 'error');
         }
     } catch (error) {
         console.error('Logout error:', error);
+        showNotification('Logout failed', 'error');
     }
 });
 
@@ -1113,10 +1512,129 @@ async function checkLoginStatus() {
 document.getElementById('clearComparison')?.addEventListener('click', clearComparison);
 document.getElementById('startComparison')?.addEventListener('click', startComparison);
 
+// Add event listener for car modal close
+carModal?.addEventListener('click', (e) => {
+    if (e.target === carModal || e.target.classList.contains('close')) {
+        // Reset form to add mode when modal is closed
+        const submitBtn = document.getElementById('carSubmitBtn');
+        if (submitBtn) {
+            submitBtn.textContent = 'Add Car';
+            delete submitBtn.dataset.editId;
+        }
+        
+        // Reset modal title
+        const modalTitle = document.querySelector('#carModal h2');
+        if (modalTitle) modalTitle.textContent = 'Add New Car';
+        
+        carModal.style.display = 'none';
+        carForm?.reset();
+    }
+});
+
+// Dashboard tab functionality
+function showDashboardTab(tabName) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Add active class to selected tab button
+    const selectedButton = document.querySelector(`[data-tab="${tabName}"]`);
+    if (selectedButton) {
+        selectedButton.classList.add('active');
+    }
+    
+    // Load content based on tab
+    if (tabName === 'listings') {
+        loadUserListings();
+    } else if (tabName === 'favorites') {
+        loadUserFavorites();
+    } else if (tabName === 'searches') {
+        loadSavedSearches();
+    }
+}
+
+// Add event listeners for dashboard tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tabName = btn.getAttribute('data-tab');
+        showDashboardTab(tabName);
+    });
+});
+
+// Add event listener for favorites button
+favoritesBtn?.addEventListener('click', () => {
+    if (!currentUser) {
+        showNotification('Please login to view your favorites', 'error');
+        return;
+    }
+    
+    // Open dashboard modal and switch to favorites tab
+    dashboardModal.style.display = 'block';
+    showDashboardTab('favorites');
+});
+
+// Scroll animations
+function initScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+            }
+        });
+    }, observerOptions);
+
+    // Add scroll reveal classes to elements
+    const revealElements = document.querySelectorAll('.car-card, .hero-content, .search-box');
+    revealElements.forEach((el, index) => {
+        el.classList.add('scroll-reveal');
+        el.style.transitionDelay = `${index * 0.1}s`;
+        observer.observe(el);
+    });
+}
+
+// Header scroll effect
+function initHeaderScrollEffect() {
+    const header = document.querySelector('header');
+    let lastScrollY = window.scrollY;
+
+    window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+        
+        if (currentScrollY > 100) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        lastScrollY = currentScrollY;
+    });
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     checkLoginStatus();
     loadCars();
+    initScrollAnimations();
+    initHeaderScrollEffect();
     
     const carsContainer = document.getElementById('featuredCars');
     if (carsContainer && !document.querySelector('.pagination')) {
